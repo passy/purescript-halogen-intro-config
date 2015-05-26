@@ -12,5 +12,8 @@
   ],
   "dependencies": {
     "purescript-halogen": "master"
+  },
+  "devDependencies": {
+    "purescript-transformers": "~0.5.5"
   }
 }

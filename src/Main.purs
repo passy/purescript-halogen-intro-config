@@ -7,6 +7,10 @@ import Data.Either
 import Control.Bind
 import Control.Monad.Eff
 
+import Control.Monad.Reader
+import Control.Monad.Reader.Class
+import Control.Monad.Reader.Trans (ReaderT())
+
 import DOM
 
 import Data.DOM.Simple.Document
@@ -28,11 +32,19 @@ appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
 -- | The state of the application
 newtype State = State { on :: Boolean }
 
+-- | Global configuration
+newtype Config = Config { toggleText :: String
+                        , onText :: String
+                        , offText :: String
+                        }
+
 -- | Inputs to the state machine
 data Input = ToggleState
 
-ui :: forall m eff. (Applicative m) => Component m Input Input
-ui = render <$> stateful (State { on: false }) update
+--                             v SF1 Input (HTML ((ReaderT Config m) Input))
+ui :: forall m eff. (Monad m) => Component (ReaderT Config m) Input Input
+--              v SF1 Input State
+ui = hoistComponent return (render <$> stateful (State { on: false }) update)
   where
   render :: State -> H.HTML (m Input)
   render (State s) = H.div_
@@ -45,5 +57,9 @@ ui = render <$> stateful (State { on: false }) update
   update (State s) ToggleState = State { on: not s.on }
 
 main = do
+  let config = Config { toggleText: "Toggle Button"
+                      , onText: "On"
+                      , offText: "Off"
+                      }
   Tuple node _ <- runUI ui
   appendToBody node
