@@ -1,0 +1,30 @@
+{
+  "name": "purescript-halogen-intro-config",
+  "version": "0.0.0",
+  "description": "PureScript Demo",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "pulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/passy/purescript-halogen-intro-config"
+  },
+  "keywords": [
+    "purescript",
+    "example",
+    "demo",
+    "intro"
+  ],
+  "author": "Pascal Hartig",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/passy/purescript-halogen-intro-config/issues"
+  },
+  "homepage": "https://github.com/passy/purescript-halogen-intro-config",
+  "devDependencies": {
+    "virtual-dom": "^2.0.1"
+  }
+}
