@@ -9,7 +9,7 @@ import Control.Monad.Eff
 
 import Control.Monad.Reader
 import Control.Monad.Reader.Class
-import Control.Monad.Reader.Trans (ReaderT())
+import Control.Monad.Reader.Trans
 
 import DOM
 
@@ -43,15 +43,16 @@ data Input = ToggleState
 
 --                             v SF1 Input (HTML ((ReaderT Config m) Input))
 ui :: forall m eff. (Monad m) => Component (ReaderT Config m) Input Input
---              v SF1 Input State
-ui = hoistComponent return (render <$> stateful (State { on: false }) update)
+--                                     v SF1 Input State
+ui = render <$> stateful (State { on: false }) update
   where
-  render :: State -> H.HTML (m Input)
-  render (State s) = H.div_
-    [ H.h1_ [ H.text "Toggle Button" ]
-    , H.button [ A.onClick (A.input_ ToggleState) ]
-               [ H.text (if s.on then "On" else "Off") ]
-    ]
+  render :: State -> H.HTML (ReaderT Config m Input)
+  render (State s) = do
+    (Config conf) <- ask
+    return $ H.div_ [ H.h1_ [ H.text conf.toggleText ]
+                    , H.button [ A.onClick (A.input_ ToggleState) ]
+                               [ H.text (if s.on then conf.onText else conf.offText) ]
+                    ]
 
   update :: State -> Input -> State
   update (State s) ToggleState = State { on: not s.on }
@@ -61,5 +62,5 @@ main = do
                       , onText: "On"
                       , offText: "Off"
                       }
-  Tuple node _ <- runUI ui
+  Tuple node _ <- runUI $ hoistComponent (runReaderT config) ui
   appendToBody node
