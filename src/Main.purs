@@ -7,6 +7,7 @@ import Data.Either
 import Control.Bind
 import Control.Monad.Eff
 
+import Control.Monad.Trans
 import Control.Monad.Reader
 import Control.Monad.Reader.Class
 import Control.Monad.Reader.Trans
@@ -41,26 +42,25 @@ newtype Config = Config { toggleText :: String
 -- | Inputs to the state machine
 data Input = ToggleState
 
---                             v SF1 Input (HTML ((ReaderT Config m) Input))
-ui :: forall m eff. (Monad m) => Component (ReaderT Config m) Input Input
---                                     v SF1 Input State
-ui = render <$> stateful (State { on: false }) update
+ui :: forall m r eff. (Monad m) => Reader Config (Component m Input Input)
+ui = do
+  conf <- ask
+  return $ render conf <$> stateful (State { on: false }) update
   where
-  render :: State -> H.HTML (ReaderT Config m Input)
-  render (State s) = do
-    (Config conf) <- ask
-    return $ H.div_ [ H.h1_ [ H.text conf.toggleText ]
-                    , H.button [ A.onClick (A.input_ ToggleState) ]
-                               [ H.text (if s.on then conf.onText else conf.offText) ]
-                    ]
+    render :: Config -> State -> H.HTML (m Input)
+    render (Config conf) (State s) =
+      H.div_ [ H.h1_ [ H.text conf.toggleText ]
+             , H.button [ A.onClick (A.input_ ToggleState) ]
+                        [ H.text (if s.on then conf.onText else conf.offText) ]
+             ]
 
-  update :: State -> Input -> State
-  update (State s) ToggleState = State { on: not s.on }
+    update :: State -> Input -> State
+    update (State s) ToggleState = State { on: not s.on }
 
 main = do
   let config = Config { toggleText: "Toggle Button"
                       , onText: "On"
                       , offText: "Off"
                       }
-  Tuple node _ <- runUI $ hoistComponent (runReaderT config) ui
+  Tuple node _ <- runUI $ runReader ui config
   appendToBody node
