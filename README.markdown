@@ -1,5 +1,7 @@
 # Halogen Config Example
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/passy/purescript-halogen-intro-config.svg)](https://greenkeeper.io/)
+
 Extending the [Halogen Intro
 Example](https://github.com/slamdata/purescript-halogen/commit/ab0d3ea534b6cb558eb5b99c8246e63b4af4d55f)
 by a Reader interface.
